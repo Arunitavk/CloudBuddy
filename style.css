@@ -136,3 +136,36 @@ nav a:hover{
 /*hridya*/
 /*next*/
 /* WEATHER */
+
+/* FOOTER */
+/* Footer */
+footer {
+    background: rgba(18, 18, 18, 0.4);   /* Slightly brighter than header for balance */
+    backdrop-filter: blur(8px);         /* smoother glass effect */
+    border-top: 1px solid rgba(98,181,232,0.4);  /* blue accent */
+    padding: 35px 20px;
+    margin-top: 60px;
+    text-align: center;
+    color: #d6e4e8;
+}
+
+/* Centered content */
+.footer-content h3 {
+    font-size: 1.6rem;
+    color: #62b5e8;       /* Cloud Buddy accent */
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+}
+
+.footer-content p {
+    font-size: 1rem;
+    color: #b8c7d0;
+    margin-bottom: 15px;
+}
+
+/* Bottom text */
+.footer-bottom p {
+    font-size: 0.85rem;
+    color: #8fbfe8;       /* soft blue tint */
+    opacity: 0.85;
+}
