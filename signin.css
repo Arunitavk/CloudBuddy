@@ -1,0 +1,121 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #121212;
+  color: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+/* Container */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+/* Card */
+.form-box {
+  background: rgba(18, 18, 18, 0.8);
+  border: 1px solid rgba(98, 181, 232, 0.4);
+  border-radius: 12px;
+  padding: 40px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+  text-align: center;
+}
+
+/* Logo */
+.logo img {
+  width: 50px;
+  margin-bottom: 10px;
+}
+.logo h2 {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  color: #62b5e8;
+}
+
+/* Headings */
+h3 {
+  margin-bottom: 20px;
+  font-size: 1.4rem;
+  color: #d6e4e8;
+}
+
+/* Input Fields */
+.input-group {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  font-size: 0.9rem;
+  display: block;
+  margin-bottom: 6px;
+  color: #d6e4e8;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(98, 181, 232, 0.5);
+  background: #1e1e1e;
+  color: #e0e0e0;
+  outline: none;
+  transition: border 0.3s ease;
+}
+
+.input-group input:focus {
+  border-color: #62b5e8;
+  box-shadow: 0 0 8px rgba(98, 181, 232, 0.4);
+}
+
+/* Button */
+.btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: linear-gradient(135deg, #62b5e8, #533cc6, #62b5e8);
+  background-size: 200% 200%;
+  background-position: left center;
+  color: #fff;
+  transition: background-position 0.4s ease, transform 0.2s ease;
+}
+
+.btn:hover {
+  background-position: right center;
+  transform: translateY(-2px);
+}
+
+/* Sign up text */
+.signup-text {
+  margin-top: 15px;
+  font-size: 0.9rem;
+  color: #b0b0b0;
+}
+.signup-text a {
+  color: #62b5e8;
+  text-decoration: none;
+  font-weight: 500;
+}
+.signup-text a:hover {
+  text-decoration: underline;
+}
+
+  
