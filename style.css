@@ -137,31 +137,3 @@ nav a:hover{
 /*next*/
 /* WEATHER */
 
-/* FOOTER */
-footer {
-    background: rgba(18, 18, 18, 0.4);   
-    backdrop-filter: blur(8px);         
-    border-top: 1px solid rgba(98,181,232,0.4);  
-    padding: 35px 20px;
-    margin-top: 60px;
-    text-align: center;
-    color: #d6e4e8;
-}
-
-.footer-content h3 {
-    font-size: 1.6rem;
-    color: #62b5e8;      
-    margin-bottom: 6px;
-    letter-spacing: 0.5px;
-}
-
-.footer-content p {
-    font-size: 1rem;
-    color: #b8c7d0;
-    margin-bottom: 15px;
-}
-
-.footer-bottom p {
-    font-size: 0.85rem;
-    color: #8fbfe8;       
-}
