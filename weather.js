@@ -1,9 +1,14 @@
-const API_KEY = "YOUR_API_KEY_HERE"; // Get it from openweathermap.org
+const API_KEY = "d640009e4724298c18cba16895cac661"; 
+console.log("Weather script loaded");   
 
-// Get user's location
+
 navigator.geolocation.getCurrentPosition(success, error);
 
 function success(position) {
+    console.log("Geolocation success"); 
+    console.log("Latitude:", position.coords.latitude);  
+    console.log("Longitude:", position.coords.longitude); 
+
     const lat = position.coords.latitude;
     const lon = position.coords.longitude;
 
@@ -11,30 +16,42 @@ function success(position) {
 }
 
 function error() {
+    console.log("Geolocation denied");  
     document.getElementById("location").textContent =
         "Location access denied";
 }
 
 function fetchWeather(lat, lon) {
+    console.log("Fetching weather…"); 
     const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`;
+    console.log("URL:", url);        
 
     fetch(url)
         .then(res => res.json())
-        .then(data => displayWeather(data));
+        .then(data => {
+            console.log("Weather API Response:", data);  
+            displayWeather(data);
+        })
+        .catch(err => console.error("Fetch error:", err)); 
 }
 
 function displayWeather(data) {
-    document.getElementById("location").textContent =
-        data.name;
+    console.log("Displaying weather..."); 
 
-    document.getElementById("temperature").textContent =
-        `Temperature: ${data.main.temp}°C`;
+    const locationText = document.getElementById("location-text");
+    const locationIcon = document.getElementById("location-icon");
+    locationText.classList.remove("location-loading");
+    locationIcon.style.color = "#62b5e8";
+    locationText.textContent = data.name;
 
-    document.getElementById("description").textContent =
-        data.weather[0].description;
+    document.getElementById("temperature").textContent = `${data.main.temp}°C`;
+    document.getElementById("description").textContent = data.weather[0].description;
 
     const iconCode = data.weather[0].icon;
+    console.log("Icon code:", iconCode); 
+
     const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
+    console.log("Icon URL:", iconUrl);  
 
     const icon = document.getElementById("weather-icon");
     icon.src = iconUrl;
