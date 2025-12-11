@@ -200,6 +200,25 @@ nav a:hover{
     top: 100px;
     z-index: 20;
 }
+
+.more-info {
+    margin-top: 40px; /* space below weather info */
+    text-align: center;
+    font-size: 1rem;
+    color: #62b5e8;
+    font-weight: 300;
+}
+
+.more-info a {
+    color: #62b5e8;
+    font-weight: 400;
+    text-decoration: underline;
+    transition: color 0.3s ease;
+}
+
+.more-info a:hover {
+    color: #fff;
+}
 /* FOOTER */
 footer {
     background: rgba(18, 18, 18, 0.4);   
