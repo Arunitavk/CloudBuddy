@@ -139,17 +139,65 @@ nav a:hover{
 .weather-box {
     padding: 60px 20px;
     text-align: center;
-    background: rgba(255,255,255,0.05);
+    background: linear-gradient(
+  135deg,
+  #020b1d 0%,
+  #031739 45%,
+  #0a1f4d 70%,
+  #120e2f 100%
+);
     border-top: 1px solid #333;
-}
-
-.weather-info h2 {
-    font-size: 2rem;
-    margin-bottom: 10px;
-    color: #62b5e8;
+    position: relative;
+    z-index: 10; 
 }
 
 .weather-info p {
     font-size: 1.2rem;
     margin: 5px 0;
+}
+
+#location {
+  font-size: 2rem;      
+  font-weight: 600;      
+  text-align: left;       
+  width: 100%;            
+  margin-left: 20px;
+}
+
+.location-loading {
+  animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+  from { opacity: 0.4; }
+  to { opacity: 1; }
+}
+
+
+.temp-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;  /* centers both together */
+    position: relative;
+    width: 90%;                     
+    margin: 40px auto 0 auto;
+}
+
+
+#temperature {
+    font-size: 3rem;     /* Bigger size */
+    font-weight: 600;
+    margin-top: 100px;      /* Moves it down */
+    color: #d6e4e8;        /* Soft light colour */
+}
+
+#weather-icon {
+    display: block ;
+    width: 120px ;
+    height: auto ;
+    background-color: transparent;
+    position: absolute;
+    right: 40px;
+    top: 100px;
+    z-index: 20;
 }
