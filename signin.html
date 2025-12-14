@@ -28,10 +28,31 @@
 
         <button type="submit" class="btn">Sign In</button>
 
-        <p class="signup-text">Don't have an account? <a href="#">Sign Up</a></p>
+        <p class="signup-text">Don't have an account? <a href="signup.html">Sign Up</a></p>
       </form>
     </div>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script>
+document.querySelector('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+    });
+    
+    if (error) {
+        alert('Error: ' + error.message);
+    } else {
+        alert('Login successful!');
+        window.location.href = 'cloudfinal1.html';
+    }
+});
+</script>
 </body>
 </html>
 

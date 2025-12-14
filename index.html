@@ -22,8 +22,8 @@
             <a href="#help">Help</a>
         </nav>
         <div class="button">
-            <button class="b">Sign up</button>
-            <button class="b">Sign in</button>
+            <button class="b" onclick="window.location.href='signup.html'">Sign up</button>
+            <button class="b" onclick="window.location.href='signin.html'">Sign in</button>
         </div>
     </header>
     <!--Front-->
@@ -38,8 +38,8 @@
             <p>
                 Get accurate weather forecasts at your fingertips
             </p>
-            <button class="btn start">
-                Get Started <span class="arrow">&#8594 </span>  
+            <button class="btn start" onclick="window.location.href='signup.html'">
+                 Get Started <span class="arrow">&#8594;</span>  
             </button>
         </div>
     </section>
@@ -76,7 +76,8 @@
             <p>&copy; 2025 Cloud Buddy. All rights reserved.</p>
         </div>
     </footer>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 <script src="weather.js"></script>
 </body>
 </html>

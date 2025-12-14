@@ -226,21 +226,20 @@
 
         <!-- Footer -->
         <footer class="text-center text-white/70 py-6">
-            <p>&copy; 2025 SkyCast. Real-time data from <a href="https://openweathermap.org" class="hover:text-white transition-colors">OpenWeatherMap API</a>[web:1].</p>
+            <p>&copy; 2025 CloudBuddy. Real-time data from <a href="https://openweathermap.org" class="hover:text-white transition-colors">OpenWeatherMap API</a>[web:1].</p>
         </footer>
     </div>
-
+   
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
     
     <script>
 
-         function logoutUser() {
+    async function logoutUser() {
     if (confirm('Are you sure you want to logout?')) {
-        // Clear local data
-        localStorage.clear();
-        // Redirect to login or home
-        window.location.href = 'login.html'; // or window.location.reload();
-        // Or just show alert for demo
+        await supabase.auth.signOut();
         alert('Logged out successfully!');
+        window.location.href = 'index.html';
     }
 }
 
@@ -256,7 +255,16 @@ const weatherIcons = {
     '71': '❄️', '73': '❄️', '75': '❄️', '77': '❄️', '80': '🌦️', '95': '⛈️'
 };
 
-document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', async function() {
+    // Check if user is logged in
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        alert('Please sign in to access this page');
+        window.location.href = 'signin.html';
+        return;
+    }
+    
+    // Original code continues...
     getCurrentLocation();
     document.getElementById('locationInput').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') searchWeather();
