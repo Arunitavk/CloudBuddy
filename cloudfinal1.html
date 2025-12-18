@@ -246,8 +246,8 @@
 
 
 
-let currentUnit = 'metric';
-let currentLocationData = null;
+let currentUnit = 'C';
+let rawWeatherData = null;
 let isDarkMode = false;
 
 const weatherIcons = {
@@ -301,40 +301,64 @@ async function searchWeather() {
     await fetchOpenMeteoWeather(location);
 }
 
-async function fetchOpenMeteoWeather(city) {
+async function fetchOpenMeteoWeather(query) {
     try {
-        // Find city coordinates
-        const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en`;
-        const geoRes = await fetch(geoUrl);
-        const geoData = await geoRes.json();
-        
-        if (!geoData.results?.[0]) 
-        {
-            showError(`"${city}" not found. Please enter a valid city name.`);
+        let geoData = null;
+        const isZip = /^\d+$/.test(query);
+
+        // 1️⃣ Try PINCODE search
+        if (isZip) {
+            const geoZipUrl = `https://geocoding-api.open-meteo.com/v1/search?postal_code=${query}&country_code=IN&count=5&language=en`;
+            const zipRes = await fetch(geoZipUrl);
+            geoData = await zipRes.json();
+        }
+
+        // 2️⃣ Fallback to NAME search if zip failed
+        if (!geoData?.results || geoData.results.length === 0) {
+            const geoNameUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5&language=en`;
+            const nameRes = await fetch(geoNameUrl);
+            geoData = await nameRes.json();
+        }
+
+        // ❌ Still nothing
+        if (!geoData?.results || geoData.results.length === 0) {
+            showError(`"${query}" not found. Please enter a valid city or pincode.`);
             return;
         }
-        
-        const { latitude, longitude, name } = geoData.results[0];
-        
-        // Get weather
-        const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,pressure_msl,visibility&hourly=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max&timezone=auto`;
+
+        // Prefer India
+        const location =
+            geoData.results.find(r => r.country_code === 'IN') ||
+            geoData.results[0];
+
+        const { latitude, longitude, name, country } = location;
+
+        // 🌦 Weather
+        const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,pressure_msl,visibility&hourly=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max&timezone=auto`;
+
         const res = await fetch(weatherUrl);
         const data = await res.json();
-        
-        currentLocationData = { name: name || city, ...data };
-        displayWeatherData(currentLocationData);
+
+        rawWeatherData = {
+            name: `${name}, ${country}`,
+            ...data
+        };
+
+        displayWeatherData(rawWeatherData);
         hideLoading();
+
     } catch (error) {
-        showError(`Failed to fetch weather: ${error.message}`);
+        showError('Failed to fetch weather data.');
     }
 }
+
 
 async function fetchWeatherByCoords(latitude, longitude) {
     const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,pressure_msl,visibility&hourly=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max&timezone=auto`;
     const res = await fetch(weatherUrl);
     const data = await res.json();
-    currentLocationData = { name: 'Your Location', ...data };
-    displayWeatherData(currentLocationData);
+    rawWeatherData = { name: 'Your Location', ...data };
+    displayWeatherData(rawWeatherData);
     hideLoading();
 }
 
@@ -344,10 +368,10 @@ function displayWeatherData(data) {
     
     // Current weather - SAFE checks
     document.getElementById('currentLocation').textContent = data.name || 'Loading...';
-    document.getElementById('currentTemp').textContent = `${Math.round(current.temperature_2m || 0)}°`;
+    document.getElementById('currentTemp').textContent = formatTemp(current.temperature_2m);
     document.getElementById('weatherIcon').textContent = weatherIcons[current.weather_code] || '🌤️';
     document.getElementById('weatherDescription').textContent = getWeatherDescription(current.weather_code);
-    document.getElementById('feelsLike').textContent = `${Math.round(current.apparent_temperature || 0)}°`;
+    document.getElementById('feelsLike').textContent =formatTemp(current.apparent_temperature);
     document.getElementById('humidity').textContent = `${current.relative_humidity_2m || 0}%`;
     document.getElementById('windSpeed').textContent = `${Math.round((current.wind_speed_10m || 0) * 3.6)} km/h`;
     document.getElementById('pressure').textContent = `${Math.round(current.pressure_msl || 0)} hPa`;
@@ -367,8 +391,8 @@ function displayWeatherData(data) {
     }
     
     document.getElementById('uvIndex').textContent = daily.uv_index_max?.[0]?.toFixed(1) || '--';
-    document.getElementById('tempMax').textContent = daily.temperature_2m_max ? `${Math.round(daily.temperature_2m_max[0])}°` : '--°';
-    document.getElementById('tempMin').textContent = daily.temperature_2m_min ? `${Math.round(daily.temperature_2m_min[0])}°` : '--°';
+    document.getElementById('tempMax').textContent = daily.temperature_2m_max ?  formatTemp(daily.temperature_2m_max[0]) : '--°';
+    document.getElementById('tempMin').textContent = daily.temperature_2m_min ? formatTemp(daily.temperature_2m_min[0]) : '--°';
 
     // Forecasts
     displayHourlyForecast(data.hourly || []);
@@ -404,7 +428,9 @@ function displayHourlyForecast(hourly) {
     for (let i = startIndex; i < startIndex + 12 && i < hourly.time.length; i++) {
         next12.push({
             time: new Date(hourly.time[i]).toLocaleTimeString([], { hour: 'numeric' }),
-            temp: Math.round(hourly.temperature_2m[i]),
+            temp: currentUnit === 'C'
+                ? Math.round(hourly.temperature_2m[i])
+                : Math.round(cToF(hourly.temperature_2m[i])),
             icon: hourly.weather_code?.[i] || 0
         });
     }
@@ -433,8 +459,12 @@ function displayWeeklyForecast(daily) {
     for (let i = 0; i < maxDays; i++) {
         weekly.push({
             day: days[i],
-            high: Math.round(daily.temperature_2m_max[i]),
-            low: Math.round(daily.temperature_2m_min[i]),
+            high: currentUnit === 'C'
+                ? Math.round(daily.temperature_2m_max[i])
+                : Math.round(cToF(daily.temperature_2m_max[i])),
+            low: currentUnit === 'C'
+                ? Math.round(daily.temperature_2m_min[i])
+                : Math.round(cToF(daily.temperature_2m_min[i])),
             icon: daily.weather_code?.[i] || 0  // Default to clear sky
         });
     }
@@ -496,7 +526,24 @@ function toggleDarkMode() {
 }
 
 function toggleUnit() {
-    alert('Unit toggle coming soon');
+    currentUnit = currentUnit === 'C' ? 'F' : 'C';
+
+    document.getElementById('unitButton').title =
+        currentUnit === 'C' ? 'Switch to °F' : 'Switch to °C';
+
+    if (rawWeatherData) {
+        displayWeatherData(rawWeatherData);
+    }
+}
+function cToF(c) {
+    return (c * 9 / 5) + 32;
+}
+
+function formatTemp(temp) {
+    if (temp === undefined || temp === null) return '--';
+    return currentUnit === 'C'
+        ? `${Math.round(temp)}°`
+        : `${Math.round(cToF(temp))}°`;
 }
 </script>
 
