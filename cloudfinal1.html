@@ -279,15 +279,23 @@ async function getCurrentLocation() {
             async (position) => {
                 await fetchWeatherByCoords(position.coords.latitude, position.coords.longitude);
             },
-            () => searchWeather('Kochi')
+            () => {
+                showError('Location permission denied. Please search for a city.');
+            }
         );
     } else {
-        searchWeather('Kochi');
+        showError('Geolocation not supported. Please search for a city.');
     }
 }
 
 async function searchWeather() {
-    const location = document.getElementById('locationInput').value.trim() || 'Kochi';
+    const location = document.getElementById('locationInput').value.trim() ;
+    if (!location) {
+        showError('Please enter a city name');
+        return;
+    }
+
+    resetWeatherUI();   
     showLoading();
     document.getElementById('locationInput').value = '';
     await fetchOpenMeteoWeather(location);
@@ -302,8 +310,8 @@ async function fetchOpenMeteoWeather(city) {
         
         if (!geoData.results?.[0]) 
         {
-            showError(`"${city}" not found. Showing default location: Kochi`);
-            return fetchOpenMeteoWeather('Kochi');
+            showError(`"${city}" not found. Please enter a valid city name.`);
+            return;
         }
         
         const { latitude, longitude, name } = geoData.results[0];
@@ -379,21 +387,28 @@ function getWeatherDescription(code) {
 }
 
 function displayHourlyForecast(hourly) {
-    if (!hourly || !hourly.time) {
-        document.getElementById('hourlyForecast').innerHTML = '<p class="text-white/70 text-center py-4">Hourly forecast unavailable</p>';
+    if (!hourly?.time) {
+        document.getElementById('hourlyForecast').innerHTML =
+            '<p class="text-white/70 text-center py-4">Hourly forecast unavailable</p>';
         return;
     }
 
+    const now = new Date();
+    const currentHourIndex = hourly.time.findIndex(t =>
+        new Date(t).getHours() === now.getHours()
+    );
+
+    const startIndex = currentHourIndex >= 0 ? currentHourIndex : 0;
     const next12 = [];
-    const maxHours = Math.min(hourly.time.length, 12);
-    for (let i = 0; i < maxHours; i++) {
+
+    for (let i = startIndex; i < startIndex + 12 && i < hourly.time.length; i++) {
         next12.push({
-            time: new Date(hourly.time[i]).toLocaleTimeString([], {hour: 'numeric'}),
+            time: new Date(hourly.time[i]).toLocaleTimeString([], { hour: 'numeric' }),
             temp: Math.round(hourly.temperature_2m[i]),
             icon: hourly.weather_code?.[i] || 0
         });
     }
-    
+
     document.getElementById('hourlyForecast').innerHTML = next12.map(h => `
         <div class="flex-shrink-0 text-center p-4 weather-card rounded-2xl min-w-[90px]">
             <p class="text-white/70 text-xs mb-2">${h.time}</p>
@@ -441,6 +456,19 @@ function displayWeeklyForecast(daily) {
     `).join('');
 }
 
+function resetWeatherUI() {
+    document.getElementById('currentLocation').textContent = '---';
+    document.getElementById('currentTemp').textContent = '--°';
+    document.getElementById('weatherDescription').textContent = '--';
+    document.getElementById('feelsLike').textContent = '--°';
+    document.getElementById('humidity').textContent = '--%';
+    document.getElementById('windSpeed').textContent = '--';
+    document.getElementById('pressure').textContent = '-- hPa';
+    document.getElementById('visibility').textContent = '-- km';
+    document.getElementById('hourlyForecast').innerHTML = '';
+    document.getElementById('weeklyForecast').innerHTML = '';
+}
+
 
 // Utility functions (keep these)
 function showLoading() {
@@ -468,8 +496,7 @@ function toggleDarkMode() {
 }
 
 function toggleUnit() {
-    currentUnit = currentUnit === 'metric' ? 'imperial' : 'metric';
-    if (currentLocationData) getCurrentLocation();
+    alert('Unit toggle coming soon');
 }
 </script>
 
