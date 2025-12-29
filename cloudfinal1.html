@@ -69,7 +69,7 @@
                     <input 
                         type="text" 
                         id="locationInput"
-                        placeholder="Search city or zip code..."
+                        placeholder="Search city..."
                         class="pl-4 pr-12 py-3 rounded-full bg-white/20 backdrop-blur-md text-white placeholder-white/70 border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/50 w-64"
                     >
                     <button onclick="searchWeather()" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-white hover:text-blue-200 transition-colors">
@@ -235,15 +235,25 @@
     
     <script>
 
-    async function logoutUser() {
+   // Replace the script section in cloudfinal1.html with this:
+
+async function logoutUser() {
     if (confirm('Are you sure you want to logout?')) {
-        await supabase.auth.signOut();
-        alert('Logged out successfully!');
-        window.location.href = 'index.html';
+        try {
+            const { error } = await supabaseClient.auth.signOut();
+            if (error) {
+                console.error('Logout error:', error);
+                alert('Error logging out: ' + error.message);
+            } else {
+                alert('Logged out successfully!');
+                window.location.href = 'index.html';
+            }
+        } catch (err) {
+            console.error('Caught error:', err);
+            alert('An error occurred during logout');
+        }
     }
 }
-
-
 
 let currentUnit = 'metric';
 let currentLocationData = null;
@@ -255,20 +265,43 @@ const weatherIcons = {
     '71': '❄️', '73': '❄️', '75': '❄️', '77': '❄️', '80': '🌦️', '95': '⛈️'
 };
 
-    document.addEventListener('DOMContentLoaded', async function() {
-    // Check if user is logged in
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-        alert('Please sign in to access this page');
+document.addEventListener('DOMContentLoaded', async function() {
+    // Check if supabaseClient exists
+    if (!supabaseClient) {
+        alert('Authentication system not initialized. Please refresh the page.');
         window.location.href = 'signin.html';
         return;
     }
     
-    // Original code continues...
-    getCurrentLocation();
-    document.getElementById('locationInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') searchWeather();
-    });
+    try {
+        // Check if user is logged in
+        const { data: { user }, error } = await supabaseClient.auth.getUser();
+        
+        if (error) {
+            console.error('Auth check error:', error);
+            alert('Authentication error. Please sign in again.');
+            window.location.href = 'signin.html';
+            return;
+        }
+        
+        if (!user) {
+            alert('Please sign in to access this page');
+            window.location.href = 'signin.html';
+            return;
+        }
+        
+        console.log('User authenticated:', user.email);
+        
+        // Original code continues...
+        getCurrentLocation();
+        document.getElementById('locationInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') searchWeather();
+        });
+    } catch (err) {
+        console.error('Authentication check failed:', err);
+        alert('Unable to verify authentication. Please sign in.');
+        window.location.href = 'signin.html';
+    }
 });
 
 async function getCurrentLocation() {
@@ -362,7 +395,6 @@ function displayWeatherData(data) {
     displayWeeklyForecast(daily);
 }
 
-
 function getWeatherDescription(code) {
     const desc = {
         0: 'Clear sky', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
@@ -398,7 +430,6 @@ function displayHourlyForecast(hourly) {
     `).join('');
 }
 
-
 function displayWeeklyForecast(daily) {
     if (!daily || !daily.time) {
         document.getElementById('weeklyForecast').innerHTML = '<p class="text-white/70 text-center py-8">Forecast unavailable</p>';
@@ -415,7 +446,7 @@ function displayWeeklyForecast(daily) {
             day: days[i],
             high: Math.round(daily.temperature_2m_max[i]),
             low: Math.round(daily.temperature_2m_min[i]),
-            icon: daily.weather_code?.[i] || 0  // Default to clear sky
+            icon: daily.weather_code?.[i] || 0
         });
     }
     
@@ -436,8 +467,7 @@ function displayWeeklyForecast(daily) {
     `).join('');
 }
 
-
-// Utility functions (keep these)
+// Utility functions
 function showLoading() {
     document.getElementById('loadingState').classList.remove('hidden');
     document.getElementById('weatherContent').classList.add('hidden');
@@ -465,6 +495,10 @@ function toggleDarkMode() {
 function toggleUnit() {
     currentUnit = currentUnit === 'metric' ? 'imperial' : 'metric';
     if (currentLocationData) getCurrentLocation();
+}
+
+function retryWeather() {
+    getCurrentLocation();
 }
 </script>
 

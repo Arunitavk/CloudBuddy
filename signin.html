@@ -15,7 +15,7 @@
         <h2>Cloud Buddy</h2>
       </div>
       <h3>Sign In</h3>
-      <form>
+      <form id="signinForm">
         <div class="input-group">
           <label for="email">Email</label>
           <input type="email" id="email" placeholder="Enter your email" required>
@@ -32,28 +32,48 @@
       </form>
     </div>
   </div>
+  
+  <!-- Load Supabase library first -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase-config.js"></script>
-<script>
-document.querySelector('form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    
-    const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password
+  <!-- Then load your config -->
+  <script src="supabase-config.js"></script>
+  <!-- Then your signin logic -->
+  <script>
+    document.getElementById('signinForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        
+        // Check if supabaseClient exists
+        if (!supabaseClient) {
+            alert('Supabase is not initialized. Please refresh the page.');
+            return;
+        }
+        
+        try {
+            console.log('Attempting signin with:', email);
+            
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
+                email: email,
+                password: password
+            });
+            
+            console.log('Signin response:', { data, error });
+            
+            if (error) {
+                console.error('Signin error:', error);
+                alert('Error: ' + error.message);
+            } else {
+                console.log('Login successful:', data.user);
+                alert('Login successful!');
+                window.location.href = 'cloudfinal1.html';
+            }
+        } catch (err) {
+            console.error('Caught error:', err);
+            alert('An error occurred: ' + err.message);
+        }
     });
-    
-    if (error) {
-        alert('Error: ' + error.message);
-    } else {
-        alert('Login successful!');
-        window.location.href = 'cloudfinal1.html';
-    }
-});
-</script>
+  </script>
 </body>
 </html>
-
-    
